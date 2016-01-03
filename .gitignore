@@ -1,0 +1,5 @@
+deps
+bin/git-zed
+.quicklocal
+quicklisp.lisp
+*.fasl
