@@ -3,11 +3,11 @@
 (defun main (args)
   (if (second args)
       (multiple-value-bind
-            (fn present-p)
+            (list present-p)
           (gethash (second args) *commands*)
         (if present-p
             (handler-case
-                (apply fn (rest (rest args)))
+                (apply (getf list :lambda) (rest (rest args)))
               (sb-int:simple-program-error () (usage)))
             (usage)))
       (usage)))
