@@ -12,7 +12,10 @@ deps:
 		--eval '(quit)'
 	@touch $@
 
-bin/git-zed: $(SOURCES) $(QL_LOCAL)/setup.lisp deps
+bin:
+	@mkdir -p bin
+
+bin/git-zed: $(SOURCES) $(QL_LOCAL)/setup.lisp deps bin
 	@buildapp \
 		--asdf-tree $(QL_LOCAL)/local-projects \
 		--asdf-tree $(QL_LOCAL)/dists \
@@ -25,7 +28,7 @@ bin/git-zed: $(SOURCES) $(QL_LOCAL)/setup.lisp deps
 .PHONY: clean
 
 clean:
-	@rm -rf deps .quicklocal bin/git-zed quicklisp.lisp
+	@rm -rf deps .quicklocal bin quicklisp.lisp
 
 $(QL_LOCAL)/setup.lisp: quicklisp.lisp
 	@sbcl --noinform --noprint --disable-debugger --no-sysinit --no-userinit \
