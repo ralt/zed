@@ -38,4 +38,9 @@ $(QL_LOCAL)/setup.lisp: quicklisp.lisp
 
 quicklisp.lisp:
 	@wget https://beta.quicklisp.org/quicklisp.lisp
+ifeq ($(UNAME_S),Linux)
 	@echo '4a7a5c2aebe0716417047854267397e24a44d0cce096127411e9ce9ccfeb2c17 quicklisp.lisp' | sha256sum -c -
+endif
+ifeq ($(UNAME_S),Darwin)
+	@echo '4a7a5c2aebe0716417047854267397e24a44d0cce096127411e9ce9ccfeb2c17 *quicklisp.lisp' | shasum -c -
+endif
