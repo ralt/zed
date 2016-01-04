@@ -4,4 +4,5 @@
   :license "GPL"
   :serial t
   :components ((:file "package")
+               (:file "commands")
                (:file "zed")))
