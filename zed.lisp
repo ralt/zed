@@ -22,4 +22,9 @@
   "Create an issue."
   (let ((zed-msg-file (git-root ".git/ZED_MSG")))
     (touch zed-msg-file)
-    (launch-editor zed-msg-file)))
+    (let ((msg (launch-editor zed-msg-file)))
+      (when (string= msg "")
+        (error "no comment found"))
+      (issue-create title msg
+                    (git-author-name) (git-author-email)
+                    (get-universal-time)))))

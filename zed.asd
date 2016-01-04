@@ -7,6 +7,7 @@
   :components ((:file "package")
                (:file "fs")
                (:file "run")
+               (:file "issue")
                (:file "git")
                (:file "commands")
                (:file "zed")))

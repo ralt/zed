@@ -1,7 +1,9 @@
 (in-package #:zed)
 
 (defun git-config (value)
-  (run "git config ~A" value))
+  (let ((ret (run "git config ~A" value)))
+    (unless (string= ret "")
+      ret)))
 
 (defvar *default-editor* "vi")
 
@@ -15,7 +17,7 @@
 
 
     (when (and (null editor)
-               (not (string= editor-program "")))
+               (editor-program))
       (setf editor editor-program))
 
     (when (and (null editor)
@@ -51,3 +53,15 @@
 
 (defun git-root (path)
   (uiop:strcat (run "git rev-parse --show-toplevel") "/" path))
+
+(defun git-author-name ()
+  (or (uiop:getenv "GIT_AUTHOR_NAME")
+      (git-config "user.name")
+      (slot-value (sb-posix:getpwuid (sb-posix:geteuid)) 'sb-posix::name)))
+
+(defun git-author-email ()
+  (or (uiop:getenv "GIT_AUTHOR_EMAIL")
+      (git-config "user.email")
+      (let ((name (slot-value (sb-posix:getpwuid (sb-posix:geteuid))
+                              'sb-posix::name)))
+        (uiop:strcat name "@" name))))
