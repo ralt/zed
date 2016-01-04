@@ -5,5 +5,6 @@
   :serial t
   :components ((:file "package")
                (:file "run")
+               (:file "git")
                (:file "commands")
                (:file "zed")))
