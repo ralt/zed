@@ -47,7 +47,7 @@ this:
 ```
 
 The hash of the latest commit pointing to this tree of trees will be
-stored in `.git/refs/issues`.
+stored in `.git/refs/zed/issues/head`.
 
 So a simple command to get the list of issues will be this:
 
