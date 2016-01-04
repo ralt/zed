@@ -34,17 +34,20 @@
 
     editor))
 
-(defun launch-editor (path env)
+(defun launch-editor (path)
   (let ((editor (git-editor)))
     (if editor
-        (launch-git-editor editor path env)
+        (launch-git-editor editor path)
         (error "Terminal is dumb, but EDITOR unset"))))
 
-(defun launch-git-editor (editor path env)
+(defun launch-git-editor (editor path)
   (unless (find ":" editor)
     (handler-case
-        (progn
-          (uiop:run-program (format nil "~A ~A" editor path) :environment env)
-          t)
-      (uiop:subprocess-error () (error "There was a problem with editor ~A" editor))))
+        (uiop:run-program (format nil "~A ~A" editor path) :pty t)
+      (uiop:subprocess-error (err)
+        (l :err "launch-git-editor: ~A" err)
+        (error "There was a problem with editor ~A" editor))))
   (uiop:read-file-string path))
+
+(defun git-root (path)
+  (uiop:strcat (run "git rev-parse --show-toplevel") "/" path))

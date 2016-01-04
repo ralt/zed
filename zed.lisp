@@ -12,8 +12,14 @@
             (usage)))
       (usage)))
 
+(defun l (priority text &rest args)
+  (syslog:log "zed" :local0 priority (apply #'format nil text args)))
+
 (defun usage ()
-  (format t "usage: git zed <COMMAND> [OPTIONS]~%"))
+  (format t "usage: git zed <COMMAND> [ARGS]~%"))
 
 (defcommand create (title)
-  "Create an issue.")
+  "Create an issue."
+  (let ((zed-msg-file (git-root ".git/ZED_MSG")))
+    (touch zed-msg-file)
+    (launch-editor zed-msg-file)))
