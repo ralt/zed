@@ -15,7 +15,7 @@
    (type :initarg :type :type git-tree-type :reader tree-type)))
 
 (defclass git-tree (git-object)
-  ((files :initarg :files :type '(vector git-tree-file))))
+  ((files :initarg :files :type (vector git-tree-file))))
 
 (defun files (tree)
   (let ((files-list nil))
