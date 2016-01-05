@@ -10,8 +10,7 @@
   '(member tree blob))
 
 (defclass git-tree-file ()
-  ((mode :initarg :mode :type string :reader mode)
-   (hash :initarg :hash :type string :reader hash)
+  ((hash :initarg :hash :type string :reader hash)
    (name :initarg :name :type string :reader name)
    (type :initarg :type :type git-tree-type :reader tree-type)))
 
@@ -22,9 +21,10 @@
   (let ((files-list nil))
     (loop for file across (slot-value tree 'files)
        do (progn
-            (with-accessors ((mode mode) (tree-type tree-type)
+            (with-accessors ((tree-type tree-type)
                              (hash hash) (name name)) file
-              (push mode files-list)
+              (push (if (eq tree-type 'blob)
+                        "100644" "040000") files-list)
               (push (string-downcase (symbol-name tree-type)) files-list)
               (push hash files-list)
               (push name files-list))))
