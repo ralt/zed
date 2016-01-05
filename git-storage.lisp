@@ -16,17 +16,19 @@
    (type :initarg :type :type git-tree-type :reader tree-type)))
 
 (defclass git-tree (git-object)
-  ((files :initarg files :type '(vector git-tree-file))))
+  ((files :initarg :files :type '(vector git-tree-file))))
 
 (defun files (tree)
   (let ((files-list nil))
-    (multiple-value-prog1 files-list
-      (loop for file across (slot-value tree 'files)
-         do (progn
-              (push (mode tree) files-list)
-              (push (string-downcase (symbol-name (tree-type tree))) files-list)
-              (push (hash tree) files-list)
-              (push (name tree) files-list))))))
+    (loop for file across (slot-value tree 'files)
+       do (progn
+            (with-accessors ((mode mode) (tree-type tree-type)
+                             (hash hash) (name name)) file
+              (push mode files-list)
+              (push (string-downcase (symbol-name tree-type)) files-list)
+              (push hash files-list)
+              (push name files-list))))
+    (reverse files-list)))
 
 (defgeneric save (object)
   (:documentation "Saves an object in git database."))
@@ -42,5 +44,5 @@
 
 (defun format-tree (tree)
   (format nil
-          "~{~A ~A ~A~T~A~%~}"
+          "~{~A ~A ~A~T~A~^~%~}"
           (files tree)))
