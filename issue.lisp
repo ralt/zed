@@ -22,7 +22,7 @@
                                                 :element-type 'issue-tree)
            :accessor issues)))
 
-(defmethod initialize-instance ((tree issues-list-tree))
+(defmethod initialize-instance :after ((tree issues-list-tree) &key)
   "Read all the existing issues and put them in the 'issues' slot")
 
 (defun issue-create (title content author-name author-email date)
