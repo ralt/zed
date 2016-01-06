@@ -71,11 +71,12 @@
           (save issue)
           (vector-push-extend issue (trees issues-list))))
   (save-tree issues-list)
+  (commit-tree issues-list)
   (ensure-directories-exist (git-root ".git/refs/zed/issues/"))
   (with-open-file (f (git-root ".git/refs/zed/issues/head")
                      :direction :output :if-exists :overwrite
                      :if-does-not-exist :create)
-    (let ((buf (uiop:strcat (hash issues-list) #\Newline)))
+    (let ((buf (uiop:strcat (commit-hash issues-list) #\Newline)))
       (write-sequence buf f))))
 
 (defmethod initialize-instance :after ((tree issues-list-tree) &key)

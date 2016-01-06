@@ -17,7 +17,8 @@
           :initform (make-array
                      0
                      :adjustable t
-                     :fill-pointer 0))))
+                     :fill-pointer 0))
+   (commit-hash :type string :accessor commit-hash)))
 
 (defun filename (git-object)
   (or (slot-value git-object 'filename)
@@ -54,3 +55,6 @@
   (format nil "~A ~A ~A~A~A"
           "100644" "blob"
           (hash blob) #\Tab (filename blob)))
+
+(defun commit-tree (tree)
+  (setf (commit-hash tree) (run "git commit-tree -m 'dummy' ~A" (hash tree))))
