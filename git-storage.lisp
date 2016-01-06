@@ -26,7 +26,7 @@
 
 (defun save-tree (tree)
   (loop for tree across (trees tree)
-     do (save-tree tree)h)
+     do (save-tree tree))
   (loop for blob across (blobs tree)
      do (save-blob blob))
   (setf (hash tree) (run-with-input (git-print tree) "git mktree")))
