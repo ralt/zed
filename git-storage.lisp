@@ -58,3 +58,10 @@
 
 (defun commit-tree (tree)
   (setf (commit-hash tree) (run "git commit-tree -m 'dummy' ~A" (hash tree))))
+
+(defun load-tree (hash)
+  (mapcar
+   (lambda (line)
+     (make-instance 'issue-tree
+                    :hash (second (uiop:split-string line :separator #(#\Tab)))))
+   (uiop:split-string (run "git ls-tree ~A" hash) :separator #(#\Newline))))

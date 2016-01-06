@@ -69,9 +69,9 @@
 
 (defmethod save ((issues-list issues-list-tree))
   (loop for issue across (issues issues-list)
-     do (progn
-          (save issue)
-          (vector-push-extend issue (trees issues-list))))
+     do (unless (hash issue)
+          (save issue))
+     do (vector-push-extend issue (trees issues-list)))
   (save-tree issues-list)
   (commit-tree issues-list)
   (ensure-directories-exist (uiop:pathname-directory-pathname *head-path*))
@@ -83,8 +83,10 @@
 
 (defmethod initialize-instance :after ((tree issues-list-tree) &key)
   "Read all the existing issues and put them in the 'issues' slot"
-  (let ((commit-hash (uiop:read-file-line *head-path*)))
-    ))
+  (loop for issue in (load-tree (uiop:read-file-line *head-path*))
+     ;; Every entry in the top-level tree is a tree,
+     ;; so we can just push them.
+     do (vector-push-extend issue (issues tree))))
 
 (defun issue-create (title content author-name author-email date)
   (let* ((message (make-instance 'issue-message-tree
