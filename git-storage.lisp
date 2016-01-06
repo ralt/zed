@@ -24,20 +24,15 @@
   (or (slot-value git-object 'filename)
       (hash git-object)))
 
-(defgeneric save (object)
-  (:documentation "Saves an object in git database."))
+(defun save-tree (tree)
+  (loop for tree across (trees tree)
+     do (save-tree tree)h)
+  (loop for blob across (blobs tree)
+     do (save-blob blob))
+  (setf (hash tree) (run-with-input (git-print tree) "git mktree")))
 
-(defmethod save ((tree git-tree))
-  (unless (hash tree)
-    (loop for tree across (trees tree)
-       do (save tree))
-    (loop for blob across (blobs tree)
-       do (save blob))
-    (setf (hash tree) (run-with-input (git-print tree) "git mktree"))))
-
-(defmethod save ((blob git-blob))
-  (unless (hash blob)
-    (setf (hash blob) (run-with-input (content blob) "git hash-object -w --stdin"))))
+(defun save-blob (blob)
+  (setf (hash blob) (run-with-input (content blob) "git hash-object -w --stdin")))
 
 (defgeneric git-print (git-object)
   (:documentation "Prints an object for git storage."))
