@@ -8,14 +8,16 @@
   ((content :initarg :content :reader content :type string)))
 
 (defclass git-tree (git-object)
-  ((blobs :initarg :blobs :accessor blobs :type (vector git-blob) :initform (make-array
-                                                                             0
-                                                                             :adjustable t
-                                                                             :fill-pointer 0))
-   (trees :initarg :trees :accessor trees :type (vector git-tree) :initform (make-array
-                                                                             0
-                                                                             :adjustable t
-                                                                             :fill-pointer 0))))
+  ((blobs :initarg :blobs :accessor blobs :type (vector git-blob)
+          :initform (make-array
+                     0
+                     :adjustable t
+                     :fill-pointer 0))
+   (trees :initarg :trees :accessor trees :type (vector git-tree)
+          :initform (make-array
+                     0
+                     :adjustable t
+                     :fill-pointer 0))))
 
 (defun filename (git-object)
   (or (slot-value git-object 'filename)

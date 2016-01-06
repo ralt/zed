@@ -57,7 +57,8 @@
                       (blobs issue))
   (vector-push-extend (make-instance 'git-blob
                                      :filename "status"
-                                     :content (string-downcase (symbol-name (status issue))))
+                                     :content (string-downcase
+                                               (symbol-name (status issue))))
                       (blobs issue))
   (setf (slot-value (head issue) 'filename) "head")
   (save (head issue))
