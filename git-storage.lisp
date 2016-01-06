@@ -1,7 +1,8 @@
 (in-package #:zed)
 
 (defclass git-object ()
-  ((hash :accessor hash :type string)))
+  ((hash :initarg :hash :accessor hash :type string :initform nil)
+   (filename :initarg :filename :type string :initform nil)))
 
 (defclass git-blob (git-object)
   ((content :initarg :content :reader content :type string)))
@@ -10,41 +11,52 @@
   '(member tree blob))
 
 (defclass git-tree (git-object)
-  ((blobs :initarg :blobs :accessor blobs :type (vector git-blob))
-   (trees :initarg :trees :accessor trees :type (vector git-tree))))
+  ((blobs :initarg :blobs :accessor blobs :type (vector git-blob) :initform (make-array
+                                                                             0
+                                                                             :adjustable t
+                                                                             :fill-pointer 0))
+   (trees :initarg :trees :accessor trees :type (vector git-tree) :initform (make-array
+                                                                             0
+                                                                             :adjustable t
+                                                                             :fill-pointer 0))))
+
+(defun filename (git-object)
+  (or (slot-value git-object 'filename)
+      (hash git-object)))
 
 (defgeneric save (object)
   (:documentation "Saves an object in git database."))
 
-(defmethod save ((object git-object))
-  (error "Not implemented"))
-
 (defmethod save ((tree git-tree))
-  (loop for tree across (trees tree)
-     do (save tree))
-  (loop for blob across (blobs tree)
-     do (save blob))
-  (setf (hash tree) (run-with-input (print tree) "git mktree")))
+  (unless (hash tree)
+    (loop for tree across (trees tree)
+       do (save tree))
+    (loop for blob across (blobs tree)
+       do (save blob))
+    (setf (hash tree) (run-with-input (git-print tree) "git mktree"))))
 
 (defmethod save ((blob git-blob))
-  (setf (hash blob) (run-with-input (content blob) "git hash-object -w --stdin")))
+  (unless (hash blob)
+    (setf (hash blob) (run-with-input (content blob) "git hash-object -w --stdin"))))
 
-(defmethod print-object ((tree git-tree) stream)
-  (format stream
-          "~{~A~%~}"
-          (loop for blob in (blobs tree)
-             collect (print blob)))
-  (format stream
+(defgeneric git-print (git-object)
+  (:documentation "Prints an object for git storage."))
+
+(defmethod git-print ((tree git-tree))
+  (format nil
           "~{~A~^~%~}"
-          (loop for tree in (trees tree)
-             collect (print-in-tree tree stream))))
+          (append
+           (loop for blob across (blobs tree)
+              collect (git-print blob))
+           (loop for tree across (trees tree)
+              collect (git-print-in-tree tree)))))
 
-(defun print-in-tree (tree stream)
-  (format stream "~A ~A ~A~T~A"
+(defun git-print-in-tree (tree)
+  (format nil "~A ~A ~A~A~A"
           "040000" "tree"
-          (hash tree) (hash tree)))
+          (hash tree) #\Tab (filename tree)))
 
-(defmethod print-object ((blob git-blob) stream)
-  (format stream "~A ~A ~A~T~A"
+(defmethod git-print ((blob git-blob))
+  (format nil "~A ~A ~A~A~A"
           "100644" "blob"
-          (hash blob) (hash blob)))
+          (hash blob) #\Tab (filename blob)))

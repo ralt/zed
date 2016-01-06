@@ -1,26 +1,81 @@
 (in-package #:zed)
 
-(defclass issue-message-tree ()
-  ((author :initarg :author :type string)
-   (date :initarg :date :type number)
-   (content :initarg :content :type string)
-   (children :initarg :children :type (vector issue-message-tree))))
+(defclass issue-message-tree (git-tree)
+  ((author :initarg :author :reader author :type string)
+   (date :initarg :date :reader date :type number)
+   (content :initarg :content :reader content :type string)
+   (children :initarg :children :reader children :type (vector issue-message-tree)
+             :initform (make-array
+                        0
+                        :adjustable t
+                        :fill-pointer 0
+                        :element-type 'issue-message-tree))))
 
 (deftype issue-status ()
   '(member open closed))
 
-(defclass issue-tree ()
-  ((title :initarg :title :type string)
-   (status :initarg :status :type issue-status)
-   (head :initarg :head :type issue-message-tree)))
+(defclass issue-tree (git-tree)
+  ((title :initarg :title :reader title :type string)
+   (status :initarg :status :reader status :type issue-status)
+   (head :initarg :head :reader head :type issue-message-tree)))
 
-(defclass issues-list-tree ()
+(defclass issues-list-tree (git-tree)
   ((issues :type (vector issue-tree) :initform (make-array
                                                 0
                                                 :adjustable t
                                                 :fill-pointer 0
                                                 :element-type 'issue-tree)
            :accessor issues)))
+
+(defmethod save ((message issue-message-tree))
+  (vector-push-extend (make-instance 'git-blob
+                                     :filename "author"
+                                     :content (author message))
+               (blobs message))
+  (vector-push-extend (make-instance 'git-blob
+                                     :filename "date"
+                                     :content (write-to-string (date message)))
+                      (blobs message))
+  (vector-push-extend (make-instance 'git-blob
+                                     :filename "content"
+                                     :content (content message))
+                      (blobs message))
+  (when (> (length (children message)) 0)
+    (let ((children-tree (make-instance 'git-tree :filename "children")))
+      (loop for child across (children message)
+         do (vector-push-extend child (trees children-tree)))
+      (push children-tree (trees message))))
+  (call-next-method message))
+
+(defmethod save ((issue issue-tree))
+  (vector-push-extend (make-instance 'git-blob
+                                     :filename "title"
+                                     :content (title issue))
+                      (blobs issue))
+  (vector-push-extend (make-instance 'git-blob
+                                     :filename "status"
+                                     :content (string-downcase (symbol-name (status issue))))
+                      (blobs issue))
+  ;; Don't forget to save the head
+  (save (head issue))
+  (vector-push-extend (make-instance 'git-tree
+                                     :filename "head"
+                                     :hash (hash (head issue)))
+                      (trees issue))
+  (call-next-method issue))
+
+(defmethod save ((issues-list issues-list-tree))
+  (loop for issue across (issues issues-list)
+     do (progn
+          (save issue)
+          (vector-push-extend issue (trees issues-list))))
+  (call-next-method issues-list)
+  (ensure-directories-exist (git-root ".git/refs/zed/issues/"))
+  (with-open-file (f (git-root ".git/refs/zed/issues/head")
+                     :direction :output :if-exists :overwrite
+                     :if-does-not-exist :create)
+    (let ((buf (uiop:strcat (hash issues-list) #\Newline)))
+      (write-sequence buf f))))
 
 (defmethod initialize-instance :after ((tree issues-list-tree) &key)
   "Read all the existing issues and put them in the 'issues' slot")
@@ -36,5 +91,5 @@
                                :status 'open
                                :head message))
          (issues-list (make-instance 'issues-list-tree)))
-    (push (issues issues-list) issue)
+    (vector-push-extend issue (issues issues-list))
     (save issues-list)))
