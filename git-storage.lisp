@@ -25,11 +25,12 @@
       (hash git-object)))
 
 (defun save-tree (tree)
-  (loop for tree across (trees tree)
-     do (save-tree tree))
-  (loop for blob across (blobs tree)
-     do (save-blob blob))
-  (setf (hash tree) (run-with-input (git-print tree) "git mktree")))
+  (unless (hash tree)
+    (loop for tree across (trees tree)
+       do (save-tree tree))
+    (loop for blob across (blobs tree)
+       do (save-blob blob))
+    (setf (hash tree) (run-with-input (git-print tree) "git mktree"))))
 
 (defun save-blob (blob)
   (setf (hash blob) (run-with-input (content blob) "git hash-object -w --stdin")))
@@ -57,7 +58,14 @@
           (hash blob) #\Tab (filename blob)))
 
 (defun commit-tree (tree)
-  (setf (commit-hash tree) (run "git commit-tree -m 'dummy' ~A" (hash tree))))
+  (setf (commit-hash tree)
+        (run "git commit-tree ~A -m 'dummy' ~A"
+             (if (probe-file *head-path*)
+                 ;; We have a parent! Take that, Batman!
+                 (format nil "-p ~A" (uiop:read-file-line *head-path*))
+                 ;; For I am The First
+                 "")
+             (hash tree))))
 
 (defun load-tree (hash)
   (mapcar
