@@ -17,7 +17,7 @@
 
 
     (when (and (null editor)
-               (editor-program))
+               editor-program)
       (setf editor editor-program))
 
     (when (and (null editor)
