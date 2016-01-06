@@ -3,7 +3,7 @@
   :author "Florian Margaine <florian@margaine.com>"
   :license "GPL"
   :serial t
-  :depends-on (:cl-syslog)
+  :depends-on (:cl-syslog :sb-posix)
   :components ((:file "package")
                (:file "fs")
                (:file "run")
