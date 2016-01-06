@@ -1,5 +1,7 @@
 (in-package #:zed)
 
+(defvar *head-path* (git-root ".git/refs/zed/issues/head"))
+
 (defclass issue-message-tree (git-tree)
   ((author :initarg :author :reader author :type string)
    (date :initarg :date :reader date :type number)
@@ -72,15 +74,17 @@
           (vector-push-extend issue (trees issues-list))))
   (save-tree issues-list)
   (commit-tree issues-list)
-  (ensure-directories-exist (git-root ".git/refs/zed/issues/"))
-  (with-open-file (f (git-root ".git/refs/zed/issues/head")
+  (ensure-directories-exist (uiop:pathname-directory-pathname *head-path*))
+  (with-open-file (f *head-path*
                      :direction :output :if-exists :overwrite
                      :if-does-not-exist :create)
     (let ((buf (uiop:strcat (commit-hash issues-list) #\Newline)))
       (write-sequence buf f))))
 
 (defmethod initialize-instance :after ((tree issues-list-tree) &key)
-  "Read all the existing issues and put them in the 'issues' slot")
+  "Read all the existing issues and put them in the 'issues' slot"
+  (let ((commit-hash (uiop:read-file-line *head-path*)))
+    ))
 
 (defun issue-create (title content author-name author-email date)
   (let* ((message (make-instance 'issue-message-tree
