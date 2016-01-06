@@ -7,9 +7,6 @@
 (defclass git-blob (git-object)
   ((content :initarg :content :reader content :type string)))
 
-(deftype git-tree-type ()
-  '(member tree blob))
-
 (defclass git-tree (git-object)
   ((blobs :initarg :blobs :accessor blobs :type (vector git-blob) :initform (make-array
                                                                              0
