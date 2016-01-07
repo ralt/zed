@@ -1,10 +1,8 @@
 (in-package #:zed)
 
 (defun run (command &rest args)
-  (handler-case
-      (uiop:run-program (apply #'format nil command args)
-                        :output '(:string :stripped t))
-    (uiop:subprocess-error () "")))
+  (uiop:run-program (apply #'format nil command args)
+                    :output '(:string :stripped t)))
 
 (defun run-with-input (input command &rest args)
   (uiop:run-program (apply #'format nil command args)

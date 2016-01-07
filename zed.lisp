@@ -28,3 +28,11 @@
       (issue-create title msg
                     (git-author-name) (git-author-email)
                     (get-universal-time)))))
+
+(defcommand pull (remote)
+  "Pull the list of issues."
+  (run "git fetch ~A refs/zed/issues/head:refs/zed/issues/head" remote))
+
+(defcommand push (remote)
+  "Push the list of issues."
+  (run "git push ~A refs/zed/issues/head:refs/zed/issues/head" remote))
