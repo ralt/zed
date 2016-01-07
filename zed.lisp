@@ -40,9 +40,11 @@ Create an issue."
                     (git-author-name) (git-author-email)
                     (get-universal-time)))))
 
-(defcommand reply (issue-message-short-hash)
-  "Reply to a message."
-  (let ((issue-message-hash (run "git rev-parse ~A" issue-message-short-hash)))))
+(defcommand reply (issue-short-hash &optional message-short-hash)
+  "git zed reply <ISSUE HASH> [MESSAGE HASH]
+Reply to a message."
+  (let ((issue-hash (run "git rev-parse ~A" issue-short-hash)))
+    (format t "~A" issue-hash)))
 
 (defcommand pull (remote)
   "git zed pull <REMOTE>
