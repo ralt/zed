@@ -73,13 +73,7 @@
           (save issue))
      do (vector-push-extend issue (trees issues-list)))
   (save-tree issues-list)
-  (commit-tree issues-list)
-  (ensure-directories-exist (uiop:pathname-directory-pathname *head-path*))
-  (with-open-file (f *head-path*
-                     :direction :output :if-exists :overwrite
-                     :if-does-not-exist :create)
-    (let ((buf (uiop:strcat (commit-hash issues-list) #\Newline)))
-      (write-sequence buf f))))
+  (commit-tree *head-path* issues-list))
 
 (defmethod initialize-instance :after ((tree issues-list-tree) &key)
   "Read all the existing issues and put them in the 'issues' slot"

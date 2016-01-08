@@ -57,15 +57,21 @@
           "100644" "blob"
           (hash blob) #\Tab (filename blob)))
 
-(defun commit-tree (tree)
+(defun commit-tree (path tree)
   (setf (commit-hash tree)
         (run "git commit-tree ~A -m 'dummy' ~A"
              (if (probe-file *head-path*)
                  ;; We have a parent! Take that, Batman!
-                 (format nil "-p ~A" (uiop:read-file-line *head-path*))
+                 (format nil "-p ~A" (uiop:read-file-line path))
                  ;; For I am The First
                  "")
-             (hash tree))))
+             (hash tree)))
+  (ensure-directories-exist (uiop:pathname-directory-pathname path))
+  (with-open-file (f path
+                     :direction :output :if-exists :overwrite
+                     :if-does-not-exist :create)
+    (let ((buf (uiop:strcat (commit-hash issues-list) #\Newline)))
+      (write-sequence buf f))))
 
 (defun load-tree (hash)
   (mapcar
