@@ -75,6 +75,11 @@
   (save-tree issues-list)
   (commit-tree *head-path* issues-list))
 
+(defgeneric hydrate (object)
+  (:documentation "Hydrates an object already fed a hash."))
+
+(defmethod hydrate ((issue issue-tree)))
+
 (defmethod initialize-instance :after ((tree issues-list-tree) &key)
   "Read all the existing issues and put them in the 'issues' slot"
   (when (probe-file *head-path*)

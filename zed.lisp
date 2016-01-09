@@ -53,7 +53,7 @@ Create an issue."
   "git zed reply <ISSUE HASH> [MESSAGE HASH]
 Reply to a message."
   (let* ((issue-hash (long-hash issue-short-hash))
-         (issue-tree (make-instance 'issue-tree :hash issue-hash)))
+         (issue-tree (hydrate (make-instance 'issue-tree :hash issue-hash))))
     (with-editor (msg *msg-file*)
       (issue-reply issue-tree
                    (or message-short-hash
