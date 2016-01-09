@@ -28,23 +28,40 @@
                        :separator #(#\Newline)))))
            *commands*))
 
+(defvar *msg-file* (git-root ".git/ZED_MSG"))
+
+(defmacro with-editor (vars &body body)
+  (let ((msg-file (second vars))
+        (msg (first vars)))
+    `(progn
+       (touch ,msg-file)
+       (let ((,msg (launch-editor ,msg-file)))
+         (when (string= ,msg "")
+           (error "no comment found"))
+         ,@body)
+       (delete-file *msg-file*))))
+
 (defcommand create (title)
   "git zed create <TITLE>
 Create an issue."
-  (let ((zed-msg-file (git-root ".git/ZED_MSG")))
-    (touch zed-msg-file)
-    (let ((msg (launch-editor zed-msg-file)))
-      (when (string= msg "")
-        (error "no comment found"))
-      (issue-create title msg
-                    (git-author-name) (git-author-email)
-                    (get-universal-time)))))
+  (with-editor (msg *msg-file*)
+    (issue-create title msg
+                  (git-author-name) (git-author-email)
+                  (get-universal-time))))
 
 (defcommand reply (issue-short-hash &optional message-short-hash)
   "git zed reply <ISSUE HASH> [MESSAGE HASH]
 Reply to a message."
-  (let ((issue-hash (run "git rev-parse ~A" issue-short-hash)))
-    (format t "~A" issue-hash)))
+  (let* ((issue-hash (long-hash issue-short-hash))
+         (issue-tree (make-instance 'issue-tree :hash issue-hash)))
+    (with-editor (msg *msg-file*)
+      (issue-reply issue-tree
+                   (or message-short-hash
+                       (head issue-tree))
+                   msg
+                   (git-author-name)
+                   (git-author-email)
+                   (get-universal-time)))))
 
 (defcommand pull (remote)
   "git zed pull <REMOTE>

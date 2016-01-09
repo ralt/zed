@@ -79,3 +79,6 @@
      (make-instance 'issue-tree
                     :hash (second (uiop:split-string line :separator #(#\Tab)))))
    (uiop:split-string (run "git ls-tree ~A" hash) :separator #(#\Newline))))
+
+(defun long-hash (short-hash)
+  (run "git rev-parse ~A" short-hash))

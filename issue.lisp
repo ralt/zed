@@ -96,3 +96,5 @@
          (issues-list (make-instance 'issues-list-tree)))
     (vector-push-extend issue (issues issues-list))
     (save issues-list)))
+
+(defun issue-reply (issue-tree message-tree content author-name author-email date))
