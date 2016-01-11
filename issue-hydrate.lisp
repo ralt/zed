@@ -26,5 +26,7 @@
                                                       (content item)))
               ((string= (filename item) "content") (setf (content message)
                                                          (content item)))))
-  ;; The only tree is "children"
-  nil)
+  ;; The only tree is "children", and it's not always there
+  (when (has-tree (git-tree message))
+    ;; todo
+    nil))

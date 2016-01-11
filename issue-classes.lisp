@@ -20,6 +20,25 @@
                         :fill-pointer 0
                         :element-type 'issue-message-tree))))
 
+(defclass issue-messages-list-tree (issue)
+  ((messages :type (vector issue-message-tree)
+             :initform (make-array
+                        0
+                        :adjustable t
+                        :fill-pointer 0
+                        :element-type 'issue-tree)
+             :accessor messages)))
+
+(defmethod initialize-instance :after ((messages-list issue-messages-list-tree) &key)
+  "Read all the existing messages and put them in the 'messages' slot"
+  (when (git-tree messages-list)
+    (loop for message-tree in (load-tree (git-tree messages-list))
+       ;; Every entry in the top-level tree is an issue,
+       ;; so we can just push them.
+       do (vector-push-extend (make-instance 'issue-message-tree
+                                             :git-tree message-tree)
+                              (messages messages-list)))))
+
 (deftype issue-status ()
   '(member open closed))
 

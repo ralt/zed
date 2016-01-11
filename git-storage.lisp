@@ -114,3 +114,6 @@
     (if (eq (class-name (class-of item)) 'git-blob)
         (add-blob tree item)
         (add-tree tree item))))
+
+(defun has-tree (tree)
+  (> (length (trees tree)) 0))
