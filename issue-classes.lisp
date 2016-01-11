@@ -1,6 +1,14 @@
 (in-package #:zed)
 
-(defclass issue-message-tree (git-tree)
+(defvar *head-path* (git-root ".git/refs/zed/issues/head"))
+
+(defclass issue ()
+  ((git-tree :reader git-tree :type git-tree)))
+
+(defmethod initialize-instance :after ((issue issue) &key)
+  (setf (slot-value issue 'git-tree) (make-instance 'git-tree)))
+
+(defclass issue-message-tree (issue)
   ((author :initarg :author :reader author :type string)
    (date :initarg :date :reader date :type number)
    (content :initarg :content :reader content :type string)
@@ -14,7 +22,7 @@
 (deftype issue-status ()
   '(member open closed))
 
-(defclass issue-tree (git-tree)
+(defclass issue-tree (issue)
   ((title :initarg :title :reader title :type string)
    (status :initarg :status :reader status :type issue-status)
    (head :initarg :head :reader head :type issue-message-tree)
@@ -25,7 +33,7 @@
    ;; existing hash.
    (updated :accessor updated :initform nil :type boolean)))
 
-(defclass issues-list-tree (git-tree)
+(defclass issues-list-tree (issue)
   ((issues :type (vector issue-tree) :initform (make-array
                                                 0
                                                 :adjustable t

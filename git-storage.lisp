@@ -18,14 +18,17 @@
                      0
                      :adjustable t
                      :fill-pointer 0))
-   (commit-hash :type string :accessor commit-hash)))
+   (commit-hash :type string :accessor commit-hash)
+   ;; See issue-tree class for the reasoning behind this slot.
+   (updated :accessor updated :type boolean :initform nil)))
 
 (defun filename (git-object)
   (or (slot-value git-object 'filename)
       (hash git-object)))
 
 (defun save-tree (tree)
-  (unless (hash tree)
+  (unless (and (hash tree)
+               (null (updated tree)))
     (loop for tree across (trees tree)
        do (save-tree tree))
     (loop for blob across (blobs tree)
@@ -34,6 +37,12 @@
 
 (defun save-blob (blob)
   (setf (hash blob) (run-with-input (content blob) "git hash-object -w --stdin")))
+
+(defun add-blob (tree blob)
+  (vector-push-extend blob (blobs tree)))
+
+(defun add-tree (parent-tree tree)
+  (vector-push-extend tree (trees parent-tree)))
 
 (defgeneric git-print (git-object)
   (:documentation "Prints an object for git storage."))
