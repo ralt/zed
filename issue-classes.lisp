@@ -45,6 +45,6 @@
   "Read all the existing issues and put them in the 'issues' slot"
   (when (probe-file *head-path*)
     (loop for issue in (load-tree (uiop:read-file-line *head-path*))
-       ;; Every entry in the top-level tree is a tree,
+       ;; Every entry in the top-level tree is an issue,
        ;; so we can just push them.
        do (vector-push-extend issue (issues tree)))))
