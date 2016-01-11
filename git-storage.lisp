@@ -104,6 +104,13 @@
 (defgeneric hydrate-git (git-object)
   (:documentation "Hydrates an git object."))
 
-(defmethod hydrate-git ((blob git-blob)))
+(defmethod hydrate-git ((blob git-blob))
+  (setf (slot-value blob 'content)
+        (run "git cat-file -p ~A" (hash blob))))
 
-(defmethod hydrate-git ((tree git-tree)))
+(defmethod hydrate-git ((tree git-tree))
+  (dolist (item (load-tree (hash tree)))
+    (hydrate-git item)
+    (if (eq (class-name (class-of item)) 'git-blob)
+        (add-blob tree item)
+        (add-tree tree item))))
