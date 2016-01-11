@@ -24,9 +24,9 @@
   '(member open closed))
 
 (defclass issue-tree (issue)
-  ((title :initarg :title :reader title :type string)
-   (status :initarg :status :reader status :type issue-status)
-   (head :initarg :head :reader head :type issue-message-tree)
+  ((title :initarg :title :accessor title :type string)
+   (status :initarg :status :accessor status :type issue-status)
+   (head :initarg :head :accessor head :type issue-message-tree)
    ;; This slot is pretty ugly in itself.
    ;; When an issue is updated (new child), it already has a
    ;; hash, so the issues list would ignore it during the save.

@@ -85,9 +85,25 @@
 (defun load-tree (hash)
   (mapcar
    (lambda (line)
-     (make-instance 'issue-tree
-                    :hash (second (uiop:split-string line :separator #(#\Tab)))))
+     (let* ((filename (second (uiop:split-string line :separator #(#\Tab))))
+            (parts (uiop:split-string line :separator " "))
+            (type (second parts))
+            (hash (first (uiop:split-string (third parts) :separator #(#\Tab)))))
+       (if (string= type "tree")
+           (make-instance 'git-tree
+                          :hash hash
+                          :filename filename)
+           (make-instance 'git-blob
+                          :hash hash
+                          :filename filename))))
    (uiop:split-string (run "git ls-tree ~A" hash) :separator #(#\Newline))))
 
 (defun long-hash (short-hash)
   (run "git rev-parse ~A" short-hash))
+
+(defgeneric hydrate-git (git-object)
+  (:documentation "Hydrates an git object."))
+
+(defmethod hydrate-git ((blob git-blob)))
+
+(defmethod hydrate-git ((tree git-tree)))
