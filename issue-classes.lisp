@@ -3,10 +3,11 @@
 (defvar *head-path* (git-root ".git/refs/zed/issues/head"))
 
 (defclass issue ()
-  ((git-tree :reader git-tree :type git-tree)))
+  ((git-tree :initarg git-tree :reader git-tree :type git-tree)))
 
 (defmethod initialize-instance :after ((issue issue) &key)
-  (setf (slot-value issue 'git-tree) (make-instance 'git-tree)))
+  (unless (git-tree issue)
+    (setf (slot-value issue 'git-tree) (make-instance 'git-tree))))
 
 (defclass issue-message-tree (issue)
   ((author :initarg :author :reader author :type string)
@@ -41,10 +42,12 @@
                                                 :element-type 'issue-tree)
            :accessor issues)))
 
-(defmethod initialize-instance :after ((tree issues-list-tree) &key)
+(defmethod initialize-instance :after ((issues-list issues-list-tree) &key)
   "Read all the existing issues and put them in the 'issues' slot"
   (when (probe-file *head-path*)
-    (loop for issue in (load-tree (uiop:read-file-line *head-path*))
+    (loop for issue-tree in (load-tree (uiop:read-file-line *head-path*))
        ;; Every entry in the top-level tree is an issue,
        ;; so we can just push them.
-       do (vector-push-extend issue (issues tree)))))
+       do (vector-push-extend (make-instance 'issue-tree
+                                             :git-tree issue-tree)
+                              (issues issues-list)))))
