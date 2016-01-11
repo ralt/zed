@@ -42,7 +42,8 @@
 
 (defmethod save ((issues-list issues-list-tree))
   (loop for issue across (issues issues-list)
-     do (unless (hash issue)
+     do (unless (and (hash issue)
+                     (null (updated issue)))
           (save issue))
      do (vector-push-extend issue (trees issues-list)))
   (save-tree issues-list)

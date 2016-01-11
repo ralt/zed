@@ -17,7 +17,13 @@
 (defclass issue-tree (git-tree)
   ((title :initarg :title :reader title :type string)
    (status :initarg :status :reader status :type issue-status)
-   (head :initarg :head :reader head :type issue-message-tree)))
+   (head :initarg :head :reader head :type issue-message-tree)
+   ;; This slot is pretty ugly in itself.
+   ;; When an issue is updated (new child), it already has a
+   ;; hash, so the issues list would ignore it during the save.
+   ;; This slot makes sure it's still updated despite the
+   ;; existing hash.
+   (updated :accessor updated :initform nil :type boolean)))
 
 (defclass issues-list-tree (git-tree)
   ((issues :type (vector issue-tree) :initform (make-array

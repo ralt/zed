@@ -52,12 +52,10 @@ Create an issue."
 (defcommand reply (issue-short-hash &optional message-short-hash)
   "git zed reply <ISSUE HASH> [MESSAGE HASH]
 Reply to a message."
-  (let* ((issue-hash (long-hash issue-short-hash))
-         (issue-tree (hydrate (make-instance 'issue-tree :hash issue-hash))))
+  (let ((issue-hash (long-hash issue-short-hash)))
     (with-editor (msg *msg-file*)
-      (issue-reply issue-tree
-                   (or message-short-hash
-                       (head issue-tree))
+      (issue-reply issue-hash
+                   message-short-hash
                    msg
                    (git-author-name)
                    (git-author-email)
