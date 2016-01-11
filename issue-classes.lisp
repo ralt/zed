@@ -3,17 +3,17 @@
 (defvar *head-path* (git-root ".git/refs/zed/issues/head"))
 
 (defclass issue ()
-  ((git-tree :initarg git-tree :reader git-tree :type git-tree)))
+  ((git-tree :initarg :git-tree :reader git-tree :type git-tree :initform nil)))
 
 (defmethod initialize-instance :after ((issue issue) &key)
   (unless (git-tree issue)
     (setf (slot-value issue 'git-tree) (make-instance 'git-tree))))
 
 (defclass issue-message-tree (issue)
-  ((author :initarg :author :reader author :type string)
-   (date :initarg :date :reader date :type number)
-   (content :initarg :content :reader content :type string)
-   (children :initarg :children :reader children :type (vector issue-message-tree)
+  ((author :initarg :author :accessor author :type string)
+   (date :initarg :date :accessor date :type number)
+   (content :initarg :content :accessor content :type string)
+   (children :initarg :children :accessor children :type (vector issue-message-tree)
              :initform (make-array
                         0
                         :adjustable t

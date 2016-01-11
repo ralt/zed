@@ -28,7 +28,7 @@
 
 (defun find-issue (list issue-hash)
   (find-if (lambda (issue)
-             (string= (hash issue) issue-hash))
+             (string= (hash (git-tree issue)) issue-hash))
            (issues list)))
 
 (defun issue-add-child (issue message-tree message)
