@@ -24,6 +24,8 @@
          (issue (find-issue issues-list issue-hash)))
     (hydrate issue)
     (issue-add-child issue message-tree message)
+    ;; This is necessary to set the 'updated' flag of an issue.
+    (updated issue)
     (save issues-list)))
 
 (defun find-issue (list issue-hash)
@@ -32,4 +34,26 @@
            (issues list)))
 
 (defun issue-add-child (issue message-tree message)
-  )
+  (unless (children (head issue))
+    (setf (children (head issue)) (make-instance 'issue-messages-list-tree)))
+  (vector-push-extend
+   message
+   (messages (children (if message-tree
+                           (find-issue-in-children issue message-tree)
+                           (head issue))))))
+
+(defun find-issue-in-children (issue child-hash)
+  (let ((child? (find-if (lambda (child)
+                           (string= (hash (git-tree child)) child-hash))
+                         (children issue))))
+    (if child? child?
+        (loop for child across (children issue)
+           with sub-child = (find-issue-in-children issue (hash (git-tree child)))
+           when sub-child
+           return sub-child))))
+
+(defun updated (issue)
+  (setf (updated issue) t)
+  (when (children issue)
+    (loop for child across (children issue)
+       do (updated child))))
