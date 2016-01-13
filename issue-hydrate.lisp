@@ -19,13 +19,13 @@
 
 (defmethod hydrate ((message issue-message-tree))
   ;; Make sure to reuse the hydrate-git'd object
-  (loop for item across (blobs (git-tree message))
-     do (cond ((string= (filename item) "author") (setf (author message)
-                                                        (content item)))
-              ((string= (filename item) "date") (setf (date message)
-                                                      (content item)))
-              ((string= (filename item) "content") (setf (content message)
-                                                         (content item)))))
+  (loop for blob across (blobs (git-tree message))
+     do (cond ((string= (filename blob) "author") (setf (author message)
+                                                        (content blob)))
+              ((string= (filename blob) "date") (setf (date message)
+                                                      (content blob)))
+              ((string= (filename blob) "content") (setf (content message)
+                                                         (content blob)))))
   ;; The only tree is "children", and it's not always there
   (when (has-tree (git-tree message))
     ;; todo
